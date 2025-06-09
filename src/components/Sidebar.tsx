@@ -10,16 +10,18 @@ import {
   Heart, 
   Settings,
   Menu,
-  X
+  X,
+  Package
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: Map },
-  { name: "Real-time Alerts", href: "/alerts", icon: Bell },
-  { name: "NGO Directory", href: "/ngo-directory", icon: Users },
-  { name: "Announcements", href: "/announcements", icon: Calendar },
-  { name: "Donations", href: "/donations", icon: Heart },
-  { name: "Manage NGOs", href: "/manage-ngos", icon: Settings },
+  { name: "Dashboard", href: "/admin", icon: Map },
+  { name: "Real-time Alerts", href: "/admin/alerts", icon: Bell },
+  { name: "NGO Directory", href: "/admin/ngo-directory", icon: Users },
+  { name: "Announcements", href: "/admin/announcements", icon: Calendar },
+  { name: "Donations", href: "/admin/donations", icon: Heart },
+  { name: "Donation Management", href: "/admin/donation-management", icon: Package },
+  { name: "Manage NGOs", href: "/admin/manage-ngos", icon: Settings },
 ];
 
 const Sidebar = () => {
