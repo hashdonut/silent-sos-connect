@@ -30,6 +30,7 @@ import Register from "./pages/auth/Register";
 import Login from "./pages/Login";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import NgoRegister from "./pages/auth/NgoRegister";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="/login" element={<UserLogin />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin/login" element={<Login />} />
+            <Route path="/ngo/register" element={<NgoRegister />} />
             <Route path="/unauthorized" element={<Unauthorized />} />
 
             {/* Protected Admin Routes */}

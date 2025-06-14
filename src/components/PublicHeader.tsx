@@ -5,15 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, Shield, Heart, Users, Calendar, HelpCircle } from "lucide-react";
 
 const PublicHeader = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
   const navigation = [
     { name: "Home", href: "/", icon: Shield },
-    { name: "Find NGOs", href: "/ngos", icon: Users },
-    { name: "Donate", href: "/donate", icon: Heart },
-    { name: "Announcements", href: "/announcements", icon: Calendar },
-    { name: "Get Help", href: "/help", icon: HelpCircle },
+    // { name: "Find NGOs", href: "/ngos", icon: Users },
+    // { name: "Donate", href: "/donate", icon: Heart },
+    // { name: "Announcements", href: "/announcements", icon: Calendar },
+    // { name: "Get Help", href: "/help", icon: HelpCircle },
   ];
 
   return (
@@ -54,55 +53,13 @@ const PublicHeader = () => {
 
           {/* Admin Login Button */}
           <div className="hidden md:flex">
-            <Link to="/admin/login">
+            <Link to="/login">
               <Button variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
-                NGO Admin Login
+                Login Here
               </Button>
             </Link>
           </div>
-
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100"
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
-            <div className="space-y-2">
-              {navigation.map((item) => {
-                const isActive = location.pathname === item.href;
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-blue-100 text-blue-700"
-                        : "text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.name}</span>
-                  </Link>
-                );
-              })}
-              <Link
-                to="/admin/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium text-blue-700 hover:bg-blue-50 border-t border-gray-200 mt-2 pt-4"
-              >
-                <Shield className="h-5 w-5" />
-                <span>NGO Admin Login</span>
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
     </header>
   );
