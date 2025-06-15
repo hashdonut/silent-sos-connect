@@ -6,26 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
+import { registerUser } from "@/api/auth";
 
 const Register = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
     email: "",
+    contact: "",
     password: "",
     confirmPassword: "",
   });
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (form.password !== form.confirmPassword) {
       alert("Passwords do not match");
       return;
     }
-    console.log("Registering:", form);
-    navigate("/dashboard");
+
+    try {
+      await registerUser(form.name, form.email, form.contact, form.password, "ordinary");
+      alert("Registration successful! You can now log in.");
+      navigate("/login");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      alert(error.message || "Registration failed. Please try again.");
+    }
   };
 
   return (
@@ -75,6 +85,19 @@ const Register = () => {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   placeholder="jane.doe@gmail.com"
+                  required
+                  className="mt-1"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="contact">Contact Number</Label>
+                <Input
+                  id="contact"
+                  type="text"
+                  value={form.contact}
+                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                  placeholder="Contact number"
                   required
                   className="mt-1"
                 />

@@ -6,23 +6,36 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Building2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { registerNGO } from "@/api/ngo";
 
 const NgoRegister = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    name: "",
-    contact: "",
-    email: "",
+    ngo_name: "",
+    ngo_contact: "",
+    ngo_email: "",
+    personal_name: "",
+    personal_contact: "",
+    personal_email: "",
     website: "",
     verification_document: "",
     address: "",
     description: "",
+    password: "",
+    confirmPassword: "",
   });
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("NGO Registration:", form);
-    navigate("/dashboard");
+
+    try {
+      await registerNGO(form);
+      alert("NGO registration submitted. We will contact you soon.");
+      navigate("/login");
+    } catch (error: any) {
+      console.error("NGO registration error:", error);
+      alert("Failed to submit registration. Please try again.");
+    }
   };
 
   return (
@@ -54,10 +67,10 @@ const NgoRegister = () => {
               <div>
                 <Label htmlFor="name">Organization Name</Label>
                 <Input
-                  id="name"
+                  id="ngo_name"
                   type="text"
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  value={form.ngo_name}
+                  onChange={(e) => setForm({ ...form, ngo_name: e.target.value })}
                   required
                 />
               </div>
@@ -65,10 +78,10 @@ const NgoRegister = () => {
               <div>
                 <Label htmlFor="contact">Contact Number</Label>
                 <Input
-                  id="contact"
+                  id="ngo_contact"
                   type="text"
-                  value={form.contact}
-                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                  value={form.ngo_contact}
+                  onChange={(e) => setForm({ ...form, ngo_contact: e.target.value })}
                   required
                 />
               </div>
@@ -76,10 +89,46 @@ const NgoRegister = () => {
               <div>
                 <Label htmlFor="email">Email Address</Label>
                 <Input
-                  id="email"
+                  id="ngo_email"
                   type="email"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  value={form.ngo_email}
+                  onChange={(e) => setForm({ ...form, ngo_email: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="personal_name">Personal Name</Label>
+                <Input
+                  id="personal_name"
+                  type="text"
+                  value={form.personal_name}
+                  onChange={(e) => setForm({ ...form, personal_name: e.target.value })}
+                  placeholder="Your Name"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="personal_contact">Personal Contact Number</Label>
+                <Input
+                  id="personal_contact"
+                  type="text"
+                  value={form.personal_contact}
+                  onChange={(e) => setForm({ ...form, personal_contact: e.target.value })}
+                  placeholder="Your Contact Number"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="personal_email">Personal Email Address</Label>
+                <Input
+                  id="personal_email"
+                  type="email"
+                  value={form.personal_email}
+                  onChange={(e) => setForm({ ...form, personal_email: e.target.value })}
+                  placeholder="Your Email Address"
                   required
                 />
               </div>
@@ -129,6 +178,30 @@ const NgoRegister = () => {
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className="w-full border border-gray-300 rounded-md p-2 mt-1"
                   placeholder="Tell us more about your organization"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  placeholder="Create a secure password"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                  placeholder="Re-enter your password"
                   required
                 />
               </div>

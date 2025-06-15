@@ -7,8 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { loginUser } from "@/api/auth";
 
 const UserLogin = () => {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [credentials, setCredentials] = useState({
@@ -16,11 +19,17 @@ const UserLogin = () => {
     password: "",
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, this would authenticate with a backend
-    console.log("Login attempt:", credentials);
-    navigate("/");
+    try {
+      const user = await loginUser(credentials.email, credentials.password);
+      login(user);
+      console.log("Login successful:", user);
+      // navigate("/");
+    } catch (err: any) {
+      console.error("Login failed:", err.message);
+      alert("Login failed: " + err.message);
+    }
   };
 
   return (

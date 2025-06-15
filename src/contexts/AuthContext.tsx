@@ -1,24 +1,32 @@
-// src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { getAuth, onAuthStateChanged, User } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { app } from "./FirebaseContext";
 
-type Role = "admin" | "ngo" | "user" | null;
+// Define the shape of your Firestore user document
+type Role = "admin" | "ngo" | "ordinary" | "ngo_admin" | null;
+
+type FirestoreUser = {
+  uid: string;
+  name: string;
+  email: string;
+  role: Role;
+  contact?: string;
+};
 
 type AuthContextType = {
-  user: User | null;
+  user: FirestoreUser | null;
   isAuthenticated: boolean;
   role: Role;
   loading: boolean;
-  login: (user: User, role: Role) => void;
+  login: (user: FirestoreUser) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<FirestoreUser | null>(null);
   const [role, setRole] = useState<Role>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,32 +36,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        setUser(firebaseUser);
-
         const docRef = doc(db, "users", firebaseUser.uid);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setRole(data.role as Role);
+          const firestoreUser: FirestoreUser = {
+            uid: firebaseUser.uid,
+            name: data.name ?? "",
+            email: data.email ?? firebaseUser.email ?? "",
+            role: data.role as Role ?? null,
+            // add other fields if needed
+          };
+
+          setUser(firestoreUser);
+          setRole(firestoreUser.role);
         } else {
+          setUser(null);
           setRole(null);
         }
-
-        setLoading(false);
       } else {
         setUser(null);
         setRole(null);
-        setLoading(false);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
-  const login = (firebaseUser: User, userRole: Role) => {
-    setUser(firebaseUser);
-    setRole(userRole);
+  const login = (firestoreUser: FirestoreUser) => {
+    setUser(firestoreUser);
+    setRole(firestoreUser.role);
   };
 
   const logout = async () => {

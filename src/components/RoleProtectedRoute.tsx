@@ -1,26 +1,14 @@
-// src/components/RoleProtectedRoute.tsx
+// components/RoleProtectedRoute.tsx
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-type RoleProtectedRouteProps = {
-  allowedRoles: ("admin" | "ngo" | "user")[];
-};
-
-const RoleProtectedRoute = ({ allowedRoles }: RoleProtectedRouteProps) => {
+const RoleProtectedRoute = ({ allowedRoles }: { allowedRoles: string[] }) => {
   const { isAuthenticated, role, loading } = useAuth();
 
-  if (loading) {
-    // Optionally replace with a proper spinner or skeleton UI
-    return <div>Loading...</div>;
-  }
+  if (loading) return null; // Or a loader
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/unauthorized" replace />;
-  }
+  if (!isAuthenticated) return <Navigate to="/login" />;
+  if (!allowedRoles.includes(role || "")) return <Navigate to="/unauthorized" />;
 
   return <Outlet />;
 };
