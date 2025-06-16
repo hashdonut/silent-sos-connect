@@ -1,6 +1,18 @@
-// src/api/auth.tsx
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  query,
+  collection,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { app } from "../contexts/FirebaseContext";
 
 const auth = getAuth(app);
@@ -22,54 +34,67 @@ export const loginUser = async (email: string, password: string) => {
   };
 
   console.log("User logged in:", firestoreUser);
-
   return firestoreUser;
 };
 
 export const registerUser = async (
-    name: string,
-    email: string,
-    contact: string,
-    password: string,
-    role: "ordinary" = "ordinary"
+  name: string,
+  email: string,
+  contact: string,
+  password: string,
+  role: "ordinary" = "ordinary"
 ) => {
-  // Step 1: Register with Firebase Auth
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-  const user = userCredential.user;
-
-  // Step 2: Store user info in Firestore
-  await setDoc(doc(db, "users", user.uid), {
-    name,
-    email,
-    contact,
-    role,
-    uid: user.uid,
-    createdAt: new Date(),
-  });
-
-  return user;
-};
-
-export const registerNgoAdmin = async (
-    name: string,
-    contact: string,
-    email: string,
-    password: string,
-    role: "ngo_admin" = "ngo_admin"
-) => {
+  try {
     // Step 1: Register with Firebase Auth
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    
-    // Step 2: Store NGO info in Firestore
+
+    // Step 2: Store user info in Firestore
     await setDoc(doc(db, "users", user.uid), {
-        name,
-        contact,
-        email,
-        role,
-        uid: user.uid,
-        createdAt: new Date(),
+      name,
+      email,
+      contact,
+      role,
+      uid: user.uid,
+      createdAt: new Date(),
     });
-    
+
     return user;
+  } catch (error: any) {
+    if (error.code === "auth/email-already-in-use") {
+      throw new Error("Email is already in use. Please use a different email.");
+    }
+    throw error;
+  }
+};
+
+export const registerNgoAdmin = async (
+  name: string,
+  contact: string,
+  email: string,
+  password: string,
+  role: "ngo_admin" = "ngo_admin"
+) => {
+  try {
+    // Step 1: Register with Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Step 2: Store user info in Firestore
+    await setDoc(doc(db, "users", user.uid), {
+      name,
+      contact,
+      email,
+      role,
+      uid: user.uid,
+      createdAt: new Date(),
+    });
+
+    return user;
+  } catch (error: any) {
+    if (error.code === "auth/email-already-in-use") {
+      throw new Error("Email is already in use. Please use a different email.");
+    }
+    throw error;
+  }
 };

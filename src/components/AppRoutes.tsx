@@ -1,6 +1,5 @@
-// AppRoutes.tsx
 import { useAuth } from "@/contexts/AuthContext";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import RoleProtectedRoute from "@/components/RoleProtectedRoute";
 
 import Layout from "./Layout";
@@ -28,56 +27,78 @@ import NgoRegister from "../pages/auth/NgoRegister";
 
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuth();
-  console.log("User in AppRoutes:", user);
+  const role = user?.role;
+
+  // Redirect based on role
+  const getRedirectForRole = () => {
+    switch (role) {
+      case "admin":
+        return <Navigate to="/admin" replace />;
+      case "ngo_admin":
+        return <Navigate to="/ngo-admin" replace />;
+      case "ngo":
+        return <Navigate to="/ngo" replace />;
+      case "ordinary":
+        return <Navigate to="/" replace />;
+      default:
+        return <Navigate to="/unauthorized" replace />;
+    }
+  };
 
   return (
     <Routes>
-      {!isAuthenticated && (
+      {!isAuthenticated ? (
         <>
           <Route path="/login" element={<UserLogin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/ngo/register" element={<NgoRegister />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </>
+      ) : (
+        <>
+          <Route path="/" element={<RoleProtectedRoute allowedRoles={["ordinary"]} />}>
+            <Route element={<PublicLayout />}>
+              <Route index element={<PublicHome />} />
+              <Route path="ngos" element={<PublicNGODirectory />} />
+              <Route path="ngo/:id" element={<PublicNGODetails />} />
+              <Route path="donate" element={<PublicDonations />} />
+              <Route path="announcements" element={<PublicAnnouncements />} />
+              <Route path="help" element={<HelpForm />} />
+            </Route>
+          </Route>
+
+          <Route path="/admin" element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
+            <Route element={<Layout />}>
+              <Route index element={<Index />} />
+              <Route path="alerts" element={<Alerts />} />
+              <Route path="ngo-directory" element={<NGODirectory />} />
+              <Route path="ngo/:id" element={<NGODetails />} />
+              <Route path="announcements" element={<Announcements />} />
+              <Route path="donations" element={<Donations />} />
+              <Route path="donation-management" element={<DonationManagement />} />
+              <Route path="manage-ngos" element={<ManageNGOs />} />
+            </Route>
+          </Route>
+
+          <Route path="/ngo-admin" element={<RoleProtectedRoute allowedRoles={["ngo_admin"]} />}>
+            <Route element={<Layout />}>
+              {/* NGO Admin routes */}
+              <Route index element={<h1>NGO Admin Dashboard</h1>} />
+            </Route>
+          </Route>
+
+          <Route path="/ngo" element={<RoleProtectedRoute allowedRoles={["ngo"]} />}>
+            <Route element={<Layout />}>
+              {/* NGO routes */}
+              <Route index element={<h1>NGO Dashboard</h1>} />
+            </Route>
+          </Route>
+
+          {/* Default route for authenticated users */}
+          <Route path="*" element={getRedirectForRole()} />
         </>
       )}
-
-      <Route element={<RoleProtectedRoute allowedRoles={["ordinary"]} />}>
-        <Route path="/" element={<PublicLayout />}>
-          <Route index element={<PublicHome />} />
-          <Route path="ngos" element={<PublicNGODirectory />} />
-          <Route path="ngo/:id" element={<PublicNGODetails />} />
-          <Route path="donate" element={<PublicDonations />} />
-          <Route path="announcements" element={<PublicAnnouncements />} />
-          <Route path="help" element={<HelpForm />} />
-        </Route>
-      </Route>
-
-      <Route path="/admin" element={<RoleProtectedRoute allowedRoles={["admin"]} />}>
-        <Route element={<Layout />}>
-          <Route index element={<Index />} />
-          <Route path="alerts" element={<Alerts />} />
-          <Route path="ngo-directory" element={<NGODirectory />} />
-          <Route path="ngo/:id" element={<NGODetails />} />
-          <Route path="announcements" element={<Announcements />} />
-          <Route path="donations" element={<Donations />} />
-          <Route path="donation-management" element={<DonationManagement />} />
-          <Route path="manage-ngos" element={<ManageNGOs />} />
-        </Route>
-      </Route>
-
-      <Route path="/ngo-admin" element={<RoleProtectedRoute allowedRoles={["ngo_admin"]} />}>
-        <Route element={<Layout />}>
-          {/* NGO Admin routes */}
-        </Route>
-      </Route>
-
-      <Route path="/ngo" element={<RoleProtectedRoute allowedRoles={["ngo"]} />}>
-        <Route element={<Layout />}>
-          {/* NGO routes */}
-        </Route>
-      </Route>
-
-      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };
