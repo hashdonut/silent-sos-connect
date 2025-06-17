@@ -13,6 +13,7 @@ import {
   X,
   Package
 } from "lucide-react";
+import { logoutUser } from "@/api/auth";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: Map },
@@ -76,6 +77,15 @@ const Sidebar = () => {
 
           {/* Footer */}
           <div className="p-4 border-t">
+            <button
+              onClick={() => {
+                logoutUser();
+              }
+              }
+              className="w-full px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Logout
+            </button>
             <p className="text-xs text-gray-500 text-center">
               Admin Panel v1.0
             </p>

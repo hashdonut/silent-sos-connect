@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { getFirestore, collection, getDocs, deleteDoc, doc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { app } from "@/contexts/FirebaseContext";
 import { useToast } from "@/components/ui/use-toast";
+import { approveNGO, rejectNGO } from "@/api/ngo";
+import { useAuth } from "@/contexts/AuthContext";
 
 type NGORequest = {
   id: string;
@@ -22,6 +24,8 @@ type NGORequest = {
 };
 
 const NGORequests = () => {
+  const { user } = useAuth();
+  console.log("Current user:", user);
   const [requests, setRequests] = useState<NGORequest[]>([]);
   const [loading, setLoading] = useState(true);
   const db = getFirestore(app);
@@ -31,6 +35,7 @@ const NGORequests = () => {
     const fetchRequests = async () => {
       const snapshot = await getDocs(collection(db, "ngo_requests"));
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NGORequest));
+      console.log("Fetched NGO requests:", data);
       setRequests(data);
       setLoading(false);
     };
@@ -39,35 +44,26 @@ const NGORequests = () => {
   }, []);
 
   const handleApprove = async (request: NGORequest) => {
-    try {
-      await setDoc(doc(db, "users", request.id), {
-        name: request.ngo_name,
-        email: request.ngo_email,
-        role: "ngo",
-        contact: request.ngo_contact,
-        address: request.address,
-        place_id: request.place_id,
-        website: request.website,
-        description: request.description,
-        personal_name: request.personal_name,
-        personal_email: request.personal_email,
-        personal_contact: request.personal_contact,
-        verification_document: request.verification_document,
-        password: request.password, // Ideally hash it before storing
-      });
-
-      await deleteDoc(doc(db, "ngo_requests", request.id));
-      setRequests(prev => prev.filter(r => r.id !== request.id));
-      toast({ title: "Approved", description: `${request.ngo_name} has been approved.` });
-    } catch (error) {
-      console.error("Approval failed", error);
-      toast({ title: "Error", description: "Failed to approve request", variant: "destructive" });
+    if (!user || !user.email || !user.password) {
+      toast({ title: "Error", description: "User not authenticated", variant: "destructive" });
+      return;
     }
+
+    console.log("Approving request:", request);
+    console.log("Current user:", user);
+    // try {
+    //   await approveNGO(request.id, user.email, user.password);
+    //   setRequests(prev => prev.filter(r => r.id !== request.id));
+    //   toast({ title: "Approved", description: `${request.ngo_name} has been approved.` });
+    // } catch (error) {
+    //   console.error("Approval failed", error);
+    //   toast({ title: "Error", description: "Failed to approve request", variant: "destructive" });
+    // }
   };
 
   const handleReject = async (id: string) => {
     try {
-      await deleteDoc(doc(db, "ngo_requests", id));
+      await rejectNGO(id); // Reuse helper
       setRequests(prev => prev.filter(r => r.id !== id));
       toast({ title: "Rejected", description: `Request has been rejected.` });
     } catch (error) {
@@ -99,7 +95,12 @@ const NGORequests = () => {
               <div><strong>Personal Name:</strong> {req.personal_name}</div>
               <div><strong>Personal Email:</strong> {req.personal_email}</div>
               <div><strong>Personal Contact:</strong> {req.personal_contact}</div>
-              <div><strong>Verification Document:</strong> <a href={req.verification_document} target="_blank" rel="noopener noreferrer" className="text-blue-600">View</a></div>
+              <div>
+                <strong>Verification Document:</strong>{" "}
+                <a href={req.verification_document} target="_blank" rel="noopener noreferrer" className="text-blue-600">
+                  View
+                </a>
+              </div>
 
               <div className="flex gap-2 mt-4">
                 <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleApprove(req)}>Approve</Button>

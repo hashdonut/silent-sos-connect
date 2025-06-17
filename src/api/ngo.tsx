@@ -49,7 +49,7 @@ export const registerNGO = async ({
     return docRef.id;
 };
 
-export const approveNGO = async (id: string) => {
+export const approveNGO = async (id: string, admin_email: string, admin_password: string) => {
   const requestRef = doc(db, "ngo_requests", id);
   const requestSnap = await getDoc(requestRef);
 
@@ -65,7 +65,9 @@ export const approveNGO = async (id: string) => {
     data.personal_contact,
     data.personal_email,
     data.password,
-    "ngo_admin"
+    "ngo_admin",
+    admin_email,
+    admin_password
   );
 
   // Step 2: Store the NGO in the "ngos" collection
@@ -93,9 +95,8 @@ export const rejectNGO = async (id: string) => {
   if (!requestSnap.exists()) {
     throw new Error("NGO request not found");
   }
-
-  // Step 1: Delete the request document
-  await deleteDoc(requestRef);
+  // append status to req document
+  await setDoc(requestRef, { status: "rejected" }, { merge: true });
   
   // Optionally, you can return a success message or the ID of the deleted request
   return id;

@@ -12,6 +12,7 @@ type FirestoreUser = {
   email: string;
   role: Role;
   contact?: string;
+  password?: string;
 };
 
 type AuthContextType = {
@@ -46,10 +47,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             name: data.name ?? "",
             email: data.email ?? firebaseUser.email ?? "",
             role: data.role as Role ?? null,
-            // add other fields if needed
+            password: data.password ?? "",
+            contact: data.contact ?? "",
           };
 
           setUser(firestoreUser);
+          console.log("User logged in:", firestoreUser);
           setRole(firestoreUser.role);
         } else {
           setUser(null);
