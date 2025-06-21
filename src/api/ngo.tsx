@@ -1,5 +1,5 @@
 // src/api/ngo.ts
-import { getFirestore, collection, addDoc, Timestamp, deleteDoc, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, Timestamp, deleteDoc, doc, getDoc, setDoc, GeoPoint } from "firebase/firestore";
 import { app } from "../contexts/FirebaseContext";
 import { registerNgoAdmin } from "./auth";
 
@@ -17,6 +17,7 @@ export const registerNGO = async ({
     address,
     description,
     password,
+    location,
 }: {
     ngo_name: string;
     ngo_contact: string;
@@ -29,7 +30,23 @@ export const registerNGO = async ({
     address: string;
     description: string;
     password: string;
+    location: { lat: number; lng: number };
 }) => {
+    console.log("Registering NGO with data:", {
+      ngo_name,
+      ngo_contact,
+      ngo_email,
+      personal_name,
+      personal_contact,
+      personal_email,
+      website,
+      verification_document,
+      address,
+      description,
+      password,
+      location,
+    });
+
     const docRef = await addDoc(collection(db, "ngo_requests"), {
         ngo_name,
         ngo_contact,
@@ -44,6 +61,7 @@ export const registerNGO = async ({
         password,
         status: "pending",
         submittedAt: Timestamp.now(),
+        location: location ? new GeoPoint(location.lat, location.lng) : null,
     });
 
     return docRef.id;
@@ -80,6 +98,7 @@ export const approveNGO = async (id: string, admin_email: string, admin_password
     verification_document: data.verification_document,
     address: data.address,
     description: data.description,
+    location: data.location,
     admin: user.uid,
     createdAt: new Date(),
   });

@@ -24,6 +24,10 @@ import Login from "../pages/Login";
 import Unauthorized from "@/pages/Unauthorized";
 import NotFound from "../pages/NotFound";
 import NgoRegister from "../pages/auth/NgoRegister";
+import NGODashboard from "@/pages/ngo/NGODashboard";
+import NgoLayout from "./NgoLayout";
+import NgoAlerts from "@/pages/ngo/NgoAlerts";
+import Helpers from "@/pages/ngo/Helpers";
 
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuth();
@@ -82,9 +86,11 @@ const AppRoutes = () => {
           </Route>
 
           <Route path="/ngo-admin" element={<RoleProtectedRoute allowedRoles={["ngo_admin"]} />}>
-            <Route element={<Layout />}>
+            <Route element={<NgoLayout />}>
               {/* NGO Admin routes */}
-              <Route index element={<h1>NGO Admin Dashboard</h1>} />
+              <Route index element={<NGODashboard />} />
+              <Route path="alerts" element={<NgoAlerts />} />
+              <Route path="users" element={<Helpers />} />
             </Route>
           </Route>
 
