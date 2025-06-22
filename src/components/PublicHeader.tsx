@@ -3,16 +3,17 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Shield, Heart, Users, Calendar, HelpCircle } from "lucide-react";
+import { logoutUser } from "@/api/auth";
 
 const PublicHeader = () => {
   const location = useLocation();
 
   const navigation = [
     { name: "Home", href: "/", icon: Shield },
-    // { name: "Find NGOs", href: "/ngos", icon: Users },
-    // { name: "Donate", href: "/donate", icon: Heart },
-    // { name: "Announcements", href: "/announcements", icon: Calendar },
-    // { name: "Get Help", href: "/help", icon: HelpCircle },
+    { name: "Find NGOs", href: "/ngos", icon: Users },
+    { name: "Donate", href: "/donate", icon: Heart },
+    { name: "Announcements", href: "/announcements", icon: Calendar },
+    { name: "Get Help", href: "/help", icon: HelpCircle },
   ];
 
   return (
@@ -51,14 +52,10 @@ const PublicHeader = () => {
             })}
           </nav>
 
-          {/* Admin Login Button */}
-          <div className="hidden md:flex">
-            <Link to="/login">
-              <Button variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
-                Login Here
-              </Button>
-            </Link>
-          </div>
+          {/* Logout */}
+          <Button variant="outline" onClick={() => logoutUser()}>
+            Logout
+          </Button>
         </div>
       </div>
     </header>

@@ -51,7 +51,7 @@ const PublicHome = () => {
             SilentSOS+ connects you with verified NGOs and emergency responders across Malaysia. 
             Get help discreetly when you need it most.
           </p>
-          {/* <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/ngos">
               <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                 Find Help Now
@@ -62,7 +62,7 @@ const PublicHome = () => {
                 Support Others
               </Button>
             </Link>
-          </div> */}
+          </div>
         </div>
       </section>
 
@@ -107,7 +107,7 @@ const PublicHome = () => {
       </section>
 
       {/* Emergency Banner */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Card className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200">
           <CardContent className="p-8 text-center">
             <Phone className="h-12 w-12 text-red-600 mx-auto mb-4" />
@@ -125,7 +125,7 @@ const PublicHome = () => {
             </div>
           </CardContent>
         </Card>
-      </section>
+      </section> */}
 
       {/* How It Works */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -181,7 +181,7 @@ const PublicHome = () => {
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
               Whether you need help or want to help others, join our community of support
             </p>
-            {/* <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/ngos">
                 <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
                   <Users className="mr-2 h-5 w-5" />
@@ -189,12 +189,12 @@ const PublicHome = () => {
                 </Button>
               </Link>
               <Link to="/donate">
-                <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
+                <Button size="lg" variant="outline" className="border-white text-blue-600 hover:bg-white/10">
                   <Heart className="mr-2 h-5 w-5" />
                   Donate Now
                 </Button>
               </Link>
-            </div> */}
+            </div>
           </CardContent>
         </Card>
       </section>

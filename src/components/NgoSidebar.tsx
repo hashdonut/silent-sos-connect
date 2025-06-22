@@ -9,12 +9,14 @@ import {
     Users,
     Bell,
     LogOut,
+    Rss
 } from "lucide-react";
 
 const navigation = [
     { name: "Dashboard", href: "/ngo-admin", icon: LayoutDashboard },
     { name: "SOS Alerts", href: "/ngo-admin/alerts", icon: Bell },
     { name: "Helpers", href: "/ngo-admin/users", icon: Users },
+    { name: "Announcements", href: "/ngo-admin/announcements", icon: Rss }
 ];
 
 const NgoSidebar = () => {
