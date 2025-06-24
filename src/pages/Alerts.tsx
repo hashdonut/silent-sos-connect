@@ -27,9 +27,9 @@ const Alerts = () => {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<"All" | "active" | "resolved">("All");
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "", // Already loaded
-  });
+  // const { isLoaded } = useJsApiLoader({
+  //   googleMapsApiKey: "", // Already loaded
+  // });
 
   const fetchAlerts = async () => {
     const db = getFirestore(app);
@@ -170,7 +170,6 @@ const Alerts = () => {
               <CardTitle>Alert Locations</CardTitle>
             </CardHeader>
             <CardContent>
-              {isLoaded ? (
                 <GoogleMap
                   mapContainerStyle={{ width: "100%", height: "300px" }}
                   center={mapCenter}
@@ -190,9 +189,6 @@ const Alerts = () => {
                     );
                   })}
                 </GoogleMap>
-              ) : (
-                <p>Loading map...</p>
-              )}
             </CardContent>
           </Card>
         </div>

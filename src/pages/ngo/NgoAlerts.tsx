@@ -55,10 +55,10 @@ const NgoAlerts = () => {
   const [routeTo, setRouteTo] = useState<{ lat: number; lng: number } | null>(null);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
 
-  const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "", // Provide your key via index.html or env
-    libraries: ["places"],
-  });
+  // const { isLoaded } = useJsApiLoader({
+  //   googleMapsApiKey: "", // Provide your key via index.html or env
+  //   libraries: ["places"],
+  // });
 
   const db = getFirestore(app);
   const auth = getAuth(app);
@@ -153,7 +153,7 @@ const NgoAlerts = () => {
 
   // Recalculate route when destination changes
   useEffect(() => {
-    if (!routeTo || !ngoLocation || !isLoaded) return;
+    if (!routeTo || !ngoLocation) return;
 
     const service = new google.maps.DirectionsService();
     service.route(
@@ -168,7 +168,7 @@ const NgoAlerts = () => {
         }
       }
     );
-  }, [routeTo, ngoLocation, isLoaded]);
+  }, [routeTo, ngoLocation]);
 
   const unassignedAlerts = useMemo(
     () =>
@@ -303,7 +303,7 @@ const NgoAlerts = () => {
       </Tabs>
 
       {/* Map View */}
-      {isLoaded && ngoLocation && (
+      {ngoLocation && (
         <div className="mt-6">
           <Card>
             <CardHeader>

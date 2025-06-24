@@ -19,7 +19,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { app } from "@/contexts/FirebaseContext";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from "sonner";
 
 interface User {
@@ -80,21 +80,36 @@ const Helpers = () => {
       return;
     }
 
-    try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      const userId = cred.user.uid;
+    const currentUser = auth.currentUser;
+    const currentEmail = currentUser?.email;
+    const currentToken = await currentUser?.getIdToken(true);
+    const currentPassword = prompt("Please re-enter your password to confirm:");
 
-      await setDoc(doc(db, "users", userId), {
+    if (!currentEmail || !currentPassword) {
+      toast.error("Admin credentials required to proceed.");
+      return;
+    }
+
+    try {
+      // Step 1: Create helper user (will sign in as helper)
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const helperId = cred.user.uid;
+
+      // Step 2: Add helper user to Firestore
+      await setDoc(doc(db, "users", helperId), {
         name,
         email,
         role: "ngo_helper",
         ngo: ngoId,
       });
 
-      const ngoRef = doc(db, "ngos", ngoId);
-      await updateDoc(ngoRef, {
-        helpers: [...helpers.map((h) => h.id), userId],
+      // Step 3: Update NGO helpers list
+      await updateDoc(doc(db, "ngos", ngoId), {
+        helpers: [...helpers.map((h) => h.id), helperId],
       });
+
+      // Step 4: Re-authenticate as admin
+      await signInWithEmailAndPassword(auth, currentEmail, currentPassword);
 
       toast.success("Helper added successfully.");
       setForm({ name: "", email: "", password: "" });
@@ -104,6 +119,7 @@ const Helpers = () => {
       toast.error("Failed to add helper: " + error.message);
     }
   };
+
 
   return (
     <div className="space-y-6">

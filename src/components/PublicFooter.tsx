@@ -28,18 +28,17 @@ const PublicFooter = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          {/* <div>
             <h4 className="font-semibold text-gray-900 mb-4">Quick Links</h4>
             <ul className="space-y-2 text-gray-600">
               <li><a href="/ngos" className="hover:text-blue-600">Find NGOs</a></li>
               <li><a href="/donate" className="hover:text-blue-600">Donate</a></li>
               <li><a href="/announcements" className="hover:text-blue-600">Latest News</a></li>
-              <li><a href="/help" className="hover:text-blue-600">Get Help</a></li>
             </ul>
-          </div>
+          </div> */}
 
           {/* Support */}
-          <div>
+          {/* <div>
             <h4 className="font-semibold text-gray-900 mb-4">Support</h4>
             <ul className="space-y-2 text-gray-600">
               <li><a href="#" className="hover:text-blue-600">Safety Resources</a></li>
@@ -47,7 +46,7 @@ const PublicFooter = () => {
               <li><a href="#" className="hover:text-blue-600">Terms of Service</a></li>
               <li><a href="/admin/login" className="hover:text-blue-600">NGO Partners</a></li>
             </ul>
-          </div>
+          </div> */}
         </div>
 
         <div className="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">

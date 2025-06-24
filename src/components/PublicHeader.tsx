@@ -13,7 +13,7 @@ const PublicHeader = () => {
     { name: "Find NGOs", href: "/ngos", icon: Users },
     { name: "Donate", href: "/donate", icon: Heart },
     { name: "Announcements", href: "/announcements", icon: Calendar },
-    { name: "Get Help", href: "/help", icon: HelpCircle },
+    // { name: "Get Help", href: "/help", icon: HelpCircle },
   ];
 
   return (

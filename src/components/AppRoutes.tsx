@@ -29,6 +29,7 @@ import NgoLayout from "./NgoLayout";
 import NgoAlerts from "@/pages/ngo/NgoAlerts";
 import Helpers from "@/pages/ngo/Helpers";
 import NgoAnnouncements from "@/pages/ngo/NgoAnnouncements";
+import DonateToNgo from "@/pages/public/DonateToNgo";
 
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuth();
@@ -68,6 +69,7 @@ const AppRoutes = () => {
               <Route path="ngos" element={<PublicNGODirectory />} />
               <Route path="ngo/:id" element={<PublicNGODetails />} />
               <Route path="donate" element={<PublicDonations />} />
+              <Route path="donate/:ngoId" element={<DonateToNgo />} />
               <Route path="announcements" element={<PublicAnnouncements />} />
               <Route path="help" element={<HelpForm />} />
             </Route>

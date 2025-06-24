@@ -6,7 +6,7 @@ import NgoHeader from "./NgoHeader";
 const NgoLayout = () => {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="flex">
+      <div className="flex pl-64">
         <NgoSidebar />
         <div className="flex-1 flex flex-col">
           <NgoHeader />

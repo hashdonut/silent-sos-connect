@@ -95,7 +95,7 @@ const PublicNGODetails = () => {
               </div>
             </div>
             <div className="flex flex-col gap-3">
-              <Link to={`/donate/${ngo.id}`}>
+              <Link to={`/donate/${id}`}>
                 <Button size="lg" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
                   <Heart className="mr-2 h-5 w-5" />
                   Donate Now

@@ -159,7 +159,7 @@ const NGODirectory = () => {
                 )}
               </div>
 
-              <Link to={`/ngo/${ngo.id}`}>
+              <Link to={`/admin/ngo/${ngo.id}`}>
                 <Button className="w-full" variant="outline">
                   More Info
                 </Button>

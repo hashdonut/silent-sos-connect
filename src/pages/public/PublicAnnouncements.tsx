@@ -184,7 +184,7 @@ const PublicAnnouncements = () => {
                   <p className="text-sm font-medium text-blue-700">{a.ngo?.name}</p>
                   <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
                     <MapPin className="h-3 w-3" />
-                    {a.state || "Unknown"}
+                    {a.ngo?.address || "Unknown"}
                   </div>
                 </div>
                 <Badge className={typeColors[a.type] || "bg-gray-100 text-gray-800"}>

@@ -44,7 +44,6 @@ const PublicDonations = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch donation announcements
       const announcementsRef = collection(db, "announcements");
       const q = query(announcementsRef, where("type", "==", "Donation"));
       const querySnapshot = await getDocs(q);
@@ -61,7 +60,7 @@ const PublicDonations = () => {
             ...data,
             ngoName: ngoData.name,
             ngoState: ngoData.address,
-            ngoId: data.ngo
+            ngoId: data.ngo,
           });
         }
       }
@@ -81,7 +80,7 @@ const PublicDonations = () => {
         totalAmount,
         activeDonors: uniqueDonors,
         ngosSupported: supportedNGOs,
-        impacted: 5000 + Math.floor(totalAmount / 20) // rough estimate
+        impacted: 5000 + Math.floor(totalAmount / 20)
       });
     };
 
@@ -97,14 +96,10 @@ const PublicDonations = () => {
 
   const getUrgencyColor = (urgency: string) => {
     switch (urgency) {
-      case "Critical":
-        return "bg-red-100 text-red-800";
-      case "High":
-        return "bg-orange-100 text-orange-800";
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+      case "Critical": return "bg-red-100 text-red-800";
+      case "High": return "bg-orange-100 text-orange-800";
+      case "Medium": return "bg-yellow-100 text-yellow-800";
+      default: return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -118,40 +113,8 @@ const PublicDonations = () => {
     "Homelessness", "Women's Rights", "Crisis Support", "Emergency Relief"
   ];
 
-  const paymentMethods = [
-    {
-      name: "Online Banking",
-      description: "FPX and major Malaysian banks",
-      icon: "🏦",
-      fee: "No fees",
-      processing: "Instant"
-    },
-    {
-      name: "Credit/Debit Card",
-      description: "Visa, Mastercard, American Express",
-      icon: "💳",
-      fee: "2.9% + RM 0.50",
-      processing: "Instant"
-    },
-    {
-      name: "TNG eWallet",
-      description: "Touch 'n Go digital payments",
-      icon: "📱",
-      fee: "No fees",
-      processing: "Instant"
-    },
-    {
-      name: "GrabPay",
-      description: "Grab's digital wallet",
-      icon: "🚗",
-      fee: "No fees",
-      processing: "Instant"
-    }
-  ];
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Support Our NGO Partners</h1>
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -160,49 +123,35 @@ const PublicDonations = () => {
         </p>
       </div>
 
-      {/* Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          {
-            title: "Total Donations",
-            value: `RM ${donationStats.totalAmount.toLocaleString()}`,
-            change: "+25%",
-            icon: Heart,
-            color: "text-red-600",
-            bgColor: "bg-red-100",
-          },
-          {
-            title: "Active Donors",
-            value: donationStats.activeDonors,
-            change: "+18%",
-            icon: Users,
-            color: "text-blue-600",
-            bgColor: "bg-blue-100",
-          },
-          {
-            title: "NGOs Supported",
-            value: donationStats.ngosSupported,
-            change: "+12",
-            icon: Gift,
-            color: "text-green-600",
-            bgColor: "bg-green-100",
-          },
-          {
-            title: "Lives Impacted",
-            value: `${donationStats.impacted}+`,
-            change: "+30%",
-            icon: TrendingUp,
-            color: "text-purple-600",
-            bgColor: "bg-purple-100",
-          }
-        ].map((stat, index) => (
-          <Card key={index} className="hover:shadow-lg transition-shadow border-blue-100">
+        {[{
+          title: "Total Donations",
+          value: `RM ${donationStats.totalAmount.toLocaleString()}`,
+          change: "+25%",
+          icon: Heart,
+          color: "text-red-600",
+          bgColor: "bg-red-100"
+        }, {
+          title: "Active Donors",
+          value: donationStats.activeDonors,
+          change: "+18%",
+          icon: Users,
+          color: "text-blue-600",
+          bgColor: "bg-blue-100"
+        }, {
+          title: "NGOs Supported",
+          value: donationStats.ngosSupported,
+          change: "+12",
+          icon: Gift,
+          color: "text-green-600",
+          bgColor: "bg-green-100"
+        }].map((stat, i) => (
+          <Card key={i} className="hover:shadow-lg transition-shadow border-blue-100">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                   <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                  <p className="text-sm text-gray-500">{stat.change} this month</p>
                 </div>
                 <div className={`p-3 rounded-full ${stat.bgColor}`}>
                   <stat.icon className={`h-6 w-6 ${stat.color}`} />
@@ -213,7 +162,6 @@ const PublicDonations = () => {
         ))}
       </div>
 
-      {/* Filters */}
       <Card className="border-blue-100">
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -240,15 +188,10 @@ const PublicDonations = () => {
               </select>
             </div>
             <div className="flex items-end">
-              <Button 
-                onClick={() => {
-                  setSelectedState("All");
-                  setSelectedCrisis("All");
-                  setDonationType("Both");
-                }}
-                variant="outline"
-                className="w-full"
-              >
+              <Button onClick={() => {
+                setSelectedState("All");
+                setSelectedCrisis("All");
+              }} variant="outline" className="w-full">
                 Clear Filters
               </Button>
             </div>
@@ -256,44 +199,62 @@ const PublicDonations = () => {
         </CardContent>
       </Card>
 
-      {/* Urgent Needs */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Current Urgent Needs</h2>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {filteredNeeds.map((need, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow border-blue-100">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg text-blue-900">{need.ngoName}</CardTitle>
-                    <div className="flex items-center text-sm text-gray-600 mt-1">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      {need.ngoState}
+          {filteredNeeds.map((need, index) => {
+            const totalRaised = (need.donation || []).reduce((sum: number, d: any) => sum + d.amount, 0);
+            const target = need.target?.amount || 1;
+            const percent = Math.min(100, Math.round((totalRaised / target) * 100));
+
+            return (
+              <Card key={index} className="hover:shadow-lg transition-shadow border-blue-100">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <CardTitle className="text-lg text-blue-900">{need.title}</CardTitle>
+                      <div className="flex items-center text-sm text-gray-600 mt-1">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {need.address}
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <Badge className={getUrgencyColor(need.target?.urgency || "Medium")}>
+                        {need.target?.urgency || "Medium"}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {need.ngoName}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Badge className={getUrgencyColor(need.target?.urgency || "Medium")}>
-                      {need.target?.urgency || "Medium"}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">
-                      {need.title}
-                    </Badge>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-gray-700">{need.description}</p>
+
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{ width: `${percent}%` }}
+                    />
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-gray-700">{need.description}</p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>Deadline: {need.target?.deadline || "N/A"}</span>
-                </div>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => navigate(`/donate/${need.ngoId}`)}>
-                  <Heart className="mr-2 h-4 w-4" />
-                  Donate Now
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+                  <p className="text-sm text-gray-600">
+                    Raised RM {totalRaised.toLocaleString()} of RM {target.toLocaleString()} ({percent}%)
+                  </p>
+
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    <span>Target due: {need.target?.deadline || "N/A"}</span>
+                  </div>
+
+                  <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => navigate(`/donate/${need.ngoId}?announcement=${need.id}`)}>
+                    <Heart className="mr-2 h-4 w-4" />
+                    Donate Now
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
+
         {filteredNeeds.length === 0 && (
           <div className="text-center py-12">
             <Heart className="h-16 w-16 text-gray-400 mx-auto mb-4" />
