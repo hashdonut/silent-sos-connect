@@ -1,3 +1,4 @@
+// Modified NgoAlerts.tsx with helper assignment dropdown for ongoing alerts
 import {
   Tabs,
   TabsList,
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Map, Calendar, Bell } from "lucide-react";
 import {
   GoogleMap,
@@ -30,6 +32,7 @@ import {
 import { app } from "@/contexts/FirebaseContext";
 import { useEffect, useMemo, useState } from "react";
 import { getAuth } from "firebase/auth";
+import { toast } from "sonner";
 
 interface Alert {
   id: string;
@@ -41,6 +44,13 @@ interface Alert {
   userName: string;
   ngo?: string;
   distance?: number;
+  assignedHelper?: string;
+}
+
+interface Helper {
+  id: string;
+  name: string;
+  currentEmergency?: string;
 }
 
 const statusColors = {
@@ -54,11 +64,7 @@ const NgoAlerts = () => {
   const [ngoId, setNgoId] = useState<string | null>(null);
   const [routeTo, setRouteTo] = useState<{ lat: number; lng: number } | null>(null);
   const [directions, setDirections] = useState<google.maps.DirectionsResult | null>(null);
-
-  // const { isLoaded } = useJsApiLoader({
-  //   googleMapsApiKey: "", // Provide your key via index.html or env
-  //   libraries: ["places"],
-  // });
+  const [helpers, setHelpers] = useState<Helper[]>([]);
 
   const db = getFirestore(app);
   const auth = getAuth(app);
@@ -80,31 +86,34 @@ const NgoAlerts = () => {
   const fetchNgoInfo = async () => {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
-
     const ngoSnap = await getDocs(collection(db, "ngos"));
     const ngoDoc = ngoSnap.docs.find((doc) => doc.data().admin === userId);
     if (!ngoDoc) return;
-
     const data = ngoDoc.data();
     setNgoId(ngoDoc.id);
     if (data.location) {
-        setNgoLocation({
-            lat: data.location.latitude,
-            lng: data.location.longitude,
-        });
-        }
-    else if (data.location?._latitude && data.location?._longitude) {
-        // Fallback for old format
-        setNgoLocation({
-        lat: data.location._latitude,
-        lng: data.location._longitude,
-        });
+      setNgoLocation({
+        lat: data.location.latitude || data.location._latitude,
+        lng: data.location.longitude || data.location._longitude,
+      });
     }
+  };
+
+  const fetchHelpers = async (ngoIdParam?: string) => {
+    const ngoRef = doc(db, "ngos", ngoIdParam ?? ngoId!);
+    const ngoDoc = await getDoc(ngoRef);
+    const helperIds: string[] = ngoDoc.data()?.helpers ?? [];
+
+    const usersSnap = await getDocs(collection(db, "users"));
+    const helperUsers: Helper[] = usersSnap.docs
+      .filter((doc) => helperIds.includes(doc.id))
+      .map((doc) => ({ id: doc.id, ...doc.data() })) as Helper[];
+
+    setHelpers(helperUsers);
   };
 
   const fetchAlerts = async () => {
     const alertSnap = await getDocs(collection(db, "sos_alerts"));
-
     const data: Alert[] = await Promise.all(
       alertSnap.docs.map(async (docSnap) => {
         const data = docSnap.data();
@@ -134,10 +143,10 @@ const NgoAlerts = () => {
           userName,
           ngo: data.ngo ?? undefined,
           distance,
+          assignedHelper: data.assignedHelper ?? undefined,
         };
       })
     );
-
     setAlerts(data);
   };
 
@@ -146,15 +155,14 @@ const NgoAlerts = () => {
   }, []);
 
   useEffect(() => {
-    if (ngoLocation) {
+    if (ngoLocation && ngoId) {
       fetchAlerts();
+      fetchHelpers();
     }
-  }, [ngoLocation]);
+  }, [ngoLocation, ngoId]);
 
-  // Recalculate route when destination changes
   useEffect(() => {
     if (!routeTo || !ngoLocation) return;
-
     const service = new google.maps.DirectionsService();
     service.route(
       {
@@ -163,30 +171,19 @@ const NgoAlerts = () => {
         travelMode: google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
-        if (status === "OK" && result) {
-          setDirections(result);
-        }
+        if (status === "OK" && result) setDirections(result);
       }
     );
   }, [routeTo, ngoLocation]);
 
-  const unassignedAlerts = useMemo(
-    () =>
-      alerts
-        .filter((a) => a.status === "active" && !a.ngo)
-        .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)),
-    [alerts]
-  );
+  const unassignedAlerts = useMemo(() =>
+    alerts.filter((a) => a.status === "active" && !a.ngo).sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)), [alerts]);
 
-  const ongoingAlerts = useMemo(
-    () => alerts.filter((a) => a.status === "active" && a.ngo === ngoId),
-    [alerts, ngoId]
-  );
+  const ongoingAlerts = useMemo(() =>
+    alerts.filter((a) => a.status === "active" && a.ngo === ngoId), [alerts, ngoId]);
 
-  const resolvedAlerts = useMemo(
-    () => alerts.filter((a) => a.status === "resolved" && a.ngo === ngoId),
-    [alerts, ngoId]
-  );
+  const resolvedAlerts = useMemo(() =>
+    alerts.filter((a) => a.status === "resolved" && a.ngo === ngoId), [alerts, ngoId]);
 
   const handleAccept = async (alertId: string) => {
     if (!ngoId) return;
@@ -199,7 +196,19 @@ const NgoAlerts = () => {
     setRouteTo({ lat, lng });
   };
 
-  const renderAlertCard = (alert: Alert, showAccept = false) => (
+  const handleAssignHelper = async (alertId: string, helperId: string) => {
+    const alertRef = doc(db, "sos_alerts", alertId);
+    const helperRef = doc(db, "users", helperId);
+    await Promise.all([
+      updateDoc(alertRef, { assignedHelper: helperId }),
+      updateDoc(helperRef, { currentEmergency: alertId }),
+    ]);
+    toast.success("Helper assigned successfully");
+    fetchAlerts();
+    fetchHelpers();
+  };
+
+  const renderAlertCard = (alert: Alert, showAccept = false, showAssign = false) => (
     <Card key={alert.id}>
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
@@ -207,47 +216,32 @@ const NgoAlerts = () => {
             <Bell className="h-5 w-5 text-red-500" />
             {alert.emergency}
           </CardTitle>
-          <Badge className={statusColors[alert.status]}>
-            {alert.status}
-          </Badge>
+          <Badge className={statusColors[alert.status]}>{alert.status}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-2 text-sm text-gray-600">
-        <div className="flex items-center">
-          <User className="h-4 w-4 mr-2" />
-          {alert?.userName}
+        <div className="flex items-center"><User className="h-4 w-4 mr-2" />{alert.userName}</div>
+        <div className="flex items-center"><Calendar className="h-4 w-4 mr-2" />{alert.timestamp.toLocaleString()}</div>
+        <div className="flex items-center"><Map className="h-4 w-4 mr-2" />Lat: {alert.location._latitude?.toFixed(5)}, Lng: {alert.location._longitude?.toFixed(5)}</div>
+        {alert.distance !== undefined && <div className="text-xs text-gray-500">~{alert.distance?.toFixed(2)} km away</div>}
+        <div className="flex gap-2 pt-2">
+          <Button onClick={() => handleRoute(alert.location._latitude, alert.location._longitude)} size="sm" variant="outline">Route</Button>
+          {showAccept && <Button onClick={() => handleAccept(alert.id)} size="sm" className="bg-blue-600 text-white">Accept Alert</Button>}
         </div>
-        <div className="flex items-center">
-          <Calendar className="h-4 w-4 mr-2" />
-          {alert?.timestamp?.toLocaleString()}
-        </div>
-        <div className="flex items-center">
-          <Map className="h-4 w-4 mr-2" />
-          Lat: {alert?.location?._latitude?.toFixed(5)}, Lng: {alert?.location?._longitude?.toFixed(5)}
-        </div>
-        {alert?.distance !== undefined && (
-          <div className="text-xs text-gray-500">
-            ~{alert?.distance?.toFixed(2)} km away
+        {showAssign && (
+          <div className="pt-2">
+            <Select onValueChange={(val) => handleAssignHelper(alert.id, val)}>
+              <SelectTrigger><SelectValue placeholder="Assign Helper" /></SelectTrigger>
+              <SelectContent>
+                {helpers
+                  .filter((h) => h.currentEmergency !== alert.id && !h.currentEmergency)
+                  .map((h) => (
+                    <SelectItem key={h.id} value={h.id}>{h.name}</SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
-        <div className="flex gap-2 pt-2">
-          <Button
-            onClick={() => handleRoute(Number(alert?.location?._latitude), Number(alert?.location?._longitude))}
-            size="sm"
-            variant="outline"
-          >
-            Route
-          </Button>
-          {showAccept && (
-            <Button
-              onClick={() => handleAccept(alert.id)}
-              size="sm"
-              className="bg-blue-600 text-white"
-            >
-              Accept Alert
-            </Button>
-          )}
-        </div>
       </CardContent>
     </Card>
   );
@@ -270,51 +264,41 @@ const NgoAlerts = () => {
 
         <TabsContent value="alerts">
           <div className="grid gap-4">
-            {unassignedAlerts.length === 0 && (
-              <div className="text-center text-gray-500">
-                No unassigned alerts nearby.
-              </div>
+            {unassignedAlerts.length === 0 ? (
+              <div className="text-center text-gray-500">No unassigned alerts nearby.</div>
+            ) : (
+              unassignedAlerts.map((a) => renderAlertCard(a, true))
             )}
-            {unassignedAlerts.map((a) => renderAlertCard(a, true))}
           </div>
         </TabsContent>
 
         <TabsContent value="ongoing">
           <div className="grid gap-4">
-            {ongoingAlerts.length === 0 && (
-              <div className="text-center text-gray-500">
-                No ongoing alerts assigned to this NGO.
-              </div>
+            {ongoingAlerts.length === 0 ? (
+              <div className="text-center text-gray-500">No ongoing alerts assigned to this NGO.</div>
+            ) : (
+              ongoingAlerts.map((a) => renderAlertCard(a, false, a.assignedHelper !== undefined ? false : true))
             )}
-            {ongoingAlerts.map((a) => renderAlertCard(a))}
           </div>
         </TabsContent>
 
         <TabsContent value="resolved">
           <div className="grid gap-4">
-            {resolvedAlerts.length === 0 && (
-              <div className="text-center text-gray-500">
-                No resolved alerts for this NGO.
-              </div>
+            {resolvedAlerts.length === 0 ? (
+              <div className="text-center text-gray-500">No resolved alerts for this NGO.</div>
+            ) : (
+              resolvedAlerts.map((a) => renderAlertCard(a))
             )}
-            {resolvedAlerts.map((a) => renderAlertCard(a))}
           </div>
         </TabsContent>
       </Tabs>
 
-      {/* Map View */}
       {ngoLocation && (
         <div className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle>Map & Route</CardTitle>
-            </CardHeader>
+            <CardHeader><CardTitle>Map & Route</CardTitle></CardHeader>
             <CardContent>
-              <GoogleMap
-                mapContainerStyle={{ width: "100%", height: "400px" }}
-                center={mapCenter}
-                zoom={12}
-              >
+              <GoogleMap mapContainerStyle={{ width: "100%", height: "400px" }} center={mapCenter} zoom={12}>
                 <Marker position={ngoLocation} label="NGO" />
                 {routeTo && <Marker position={routeTo} label="Target" />}
                 {directions && <DirectionsRenderer directions={directions} />}
