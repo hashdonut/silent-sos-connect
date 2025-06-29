@@ -1,68 +1,17 @@
-
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Users, Calendar, TrendingUp } from "lucide-react";
+import { collection, getDocs, getFirestore, query, where } from "firebase/firestore";
+import { app } from "@/contexts/FirebaseContext";
 
 const Index = () => {
-  // Mock data for statistics
-  const stats = [
-    {
-      title: "Total Alerts Today",
-      value: "23",
-      change: "+12%",
-      icon: Bell,
-      color: "text-red-600",
-      bgColor: "bg-red-100",
-    },
-    {
-      title: "Active NGOs",
-      value: "156",
-      change: "+3%",
-      icon: Users,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
-    },
-    {
-      title: "Resolved Cases",
-      value: "89%",
-      change: "+5%",
-      icon: TrendingUp,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
-    },
-    {
-      title: "Pending Responses",
-      value: "7",
-      change: "-2",
-      icon: Calendar,
-      color: "text-yellow-600",
-      bgColor: "bg-yellow-100",
-    },
-  ];
-
-  const recentAlerts = [
-    {
-      id: 1,
-      type: "Silent Alert",
-      location: "Kuala Lumpur",
-      time: "2 minutes ago",
-      status: "Pending",
-    },
-    {
-      id: 2,
-      type: "Emergency Call",
-      location: "Petaling Jaya",
-      time: "5 minutes ago",
-      status: "Responded",
-    },
-    {
-      id: 3,
-      type: "Silent Alert",
-      location: "Shah Alam",
-      time: "12 minutes ago",
-      status: "Resolved",
-    },
-  ];
+  const db = getFirestore(app);
+  const [alertsToday, setAlertsToday] = useState(0);
+  const [activeNgos, setActiveNgos] = useState(0);
+  const [resolvedPercentage, setResolvedPercentage] = useState("0%");
+  const [pendingResponses, setPendingResponses] = useState(0);
+  const [recentAlerts, setRecentAlerts] = useState<any[]>([]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -77,9 +26,86 @@ const Index = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      const alertsSnap = await getDocs(collection(db, "sos_alerts"));
+      const ngosSnap = await getDocs(collection(db, "ngos"));
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      let todayCount = 0;
+      let pending = 0;
+      let resolved = 0;
+      const recent: any[] = [];
+
+      alertsSnap.docs.forEach((doc) => {
+        const data = doc.data();
+        const time = data.timestamp?.toDate?.() ?? new Date();
+
+        if (time >= today) todayCount++;
+        if (data.status === "active") pending++;
+        if (data.status === "resolved") resolved++;
+
+        recent.push({
+          id: doc.id,
+          type: data.emergency,
+          location: data.location?.address || "Unknown",
+          time: time.toLocaleString(),
+          status: data.status === "resolved" ? "Resolved" : data.ngo ? "Responded" : "Pending",
+        });
+      });
+
+      const total = resolved + pending;
+      const resolvedPct = total > 0 ? `${Math.round((resolved / total) * 100)}%` : "0%";
+
+      setAlertsToday(todayCount);
+      setActiveNgos(ngosSnap.size);
+      setPendingResponses(pending);
+      setResolvedPercentage(resolvedPct);
+      setRecentAlerts(recent.slice(0, 5));
+    };
+
+    fetchStats();
+  }, []);
+
+  const stats = [
+    {
+      title: "Total Alerts Today",
+      value: alertsToday.toString(),
+      change: "+N/A",
+      icon: Bell,
+      color: "text-red-600",
+      bgColor: "bg-red-100",
+    },
+    {
+      title: "Active NGOs",
+      value: activeNgos.toString(),
+      change: "+N/A",
+      icon: Users,
+      color: "text-blue-600",
+      bgColor: "bg-blue-100",
+    },
+    {
+      title: "Resolved Cases",
+      value: resolvedPercentage,
+      change: "+N/A",
+      icon: TrendingUp,
+      color: "text-green-600",
+      bgColor: "bg-green-100",
+    },
+    {
+      title: "Pending Responses",
+      value: pendingResponses.toString(),
+      change: "-N/A",
+      icon: Calendar,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100",
+    },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
         <h1 className="text-3xl font-bold mb-2">Welcome to SilentSOS+ Admin</h1>
         <p className="text-blue-100">
@@ -87,7 +113,6 @@ const Index = () => {
         </p>
       </div>
 
-      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <Card key={index} className="hover:shadow-lg transition-shadow">
@@ -108,7 +133,6 @@ const Index = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Alerts */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -128,16 +152,13 @@ const Index = () => {
                     <p className="text-sm text-gray-600">{alert.location}</p>
                     <p className="text-xs text-gray-500">{alert.time}</p>
                   </div>
-                  <Badge className={getStatusColor(alert.status)}>
-                    {alert.status}
-                  </Badge>
+                  <Badge className={getStatusColor(alert.status)}>{alert.status}</Badge>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Map Placeholder */}
         <Card>
           <CardHeader>
             <CardTitle>Emergency Locations</CardTitle>

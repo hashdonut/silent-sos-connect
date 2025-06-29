@@ -1,38 +1,69 @@
-
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { collection, getDocs, getFirestore } from "firebase/firestore";
+import { app } from "@/contexts/FirebaseContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Shield, Users, Heart, Phone, MapPin, Clock, CheckCircle } from "lucide-react";
+import {
+  Shield,
+  Users,
+  Heart,
+  Phone,
+  MapPin,
+  Clock,
+  CheckCircle,
+} from "lucide-react";
 
 const PublicHome = () => {
+  const db = getFirestore(app);
+  const [ngoCount, setNgoCount] = useState(0);
+  const [alertsCount, setAlertsCount] = useState(0);
+  const [livesHelped, setLivesHelped] = useState(0);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const ngosSnap = await getDocs(collection(db, "ngos"));
+      const alertsSnap = await getDocs(collection(db, "sos_alerts"));
+
+      setNgoCount(ngosSnap.size);
+      setAlertsCount(alertsSnap.size);
+      setLivesHelped(alertsSnap.size);
+    };
+    fetchStats();
+  }, []);
+
   const features = [
     {
       icon: Shield,
       title: "24/7 Emergency Support",
-      description: "Immediate access to verified NGOs and emergency responders across Malaysia"
+      description:
+        "Immediate access to verified NGOs and emergency responders across Malaysia",
     },
     {
       icon: Users,
       title: "Verified NGO Network",
-      description: "Connect with trusted organizations specializing in various crisis situations"
+      description:
+        "Connect with trusted organizations specializing in various crisis situations",
     },
     {
       icon: Heart,
       title: "Community Support",
-      description: "Make a difference through donations and volunteer opportunities"
+      description:
+        "Make a difference through donations and volunteer opportunities",
     },
     {
       icon: Phone,
       title: "Silent Alert System",
-      description: "Discreet emergency assistance when you can't speak or call for help"
-    }
+      description:
+        "Discreet emergency assistance when you can't speak or call for help",
+    },
   ];
 
   const stats = [
-    { number: "50+", label: "Verified NGOs" },
+    { number: `${ngoCount}+`, label: "Verified NGOs" },
     { number: "24/7", label: "Emergency Support" },
     { number: "13", label: "States Covered" },
-    { number: "1000+", label: "Lives Helped" }
+    { number: `${livesHelped}+`, label: "Lives Helped" },
   ];
 
   return (
@@ -45,20 +76,29 @@ const PublicHome = () => {
           </div>
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Your Safety Network
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600"> is Here</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+              {" "}is Here
+            </span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            SilentSOS+ connects you with verified NGOs and emergency responders across Malaysia. 
-            Get help discreetly when you need it most.
+            SilentSOS+ connects you with verified NGOs and emergency responders across
+            Malaysia. Get help discreetly when you need it most.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/ngos">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+              <Button
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
                 Find Help Now
               </Button>
             </Link>
             <Link to="/donate">
-              <Button size="lg" variant="outline" className="border-blue-200 text-blue-700 hover:bg-blue-50">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-blue-200 text-blue-700 hover:bg-blue-50"
+              >
                 Support Others
               </Button>
             </Link>
@@ -90,7 +130,7 @@ const PublicHome = () => {
             Our comprehensive support system ensures help is always within reach
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
             <Card key={index} className="border-blue-100 hover:shadow-lg transition-shadow">
@@ -98,34 +138,15 @@ const PublicHome = () => {
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <feature.icon className="h-8 w-8 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {feature.title}
+                </h3>
                 <p className="text-gray-600">{feature.description}</p>
               </CardContent>
             </Card>
           ))}
         </div>
       </section>
-
-      {/* Emergency Banner */}
-      {/* <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <Card className="bg-gradient-to-r from-red-50 to-pink-50 border-red-200">
-          <CardContent className="p-8 text-center">
-            <Phone className="h-12 w-12 text-red-600 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-red-900 mb-2">In Immediate Danger?</h3>
-            <p className="text-red-800 mb-4">
-              If you're in immediate danger, call emergency services or use our silent alert feature
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="bg-red-600 hover:bg-red-700">
-                Emergency: 999
-              </Button>
-              <Button size="lg" variant="outline" className="border-red-200 text-red-700 hover:bg-red-50">
-                Silent Alert
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </section> */}
 
       {/* How It Works */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,35 +158,44 @@ const PublicHome = () => {
             Getting help is simple and secure
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <MapPin className="h-8 w-8 text-blue-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">1. Find Nearby Help</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              1. Find Nearby Help
+            </h3>
             <p className="text-gray-600">
-              Browse verified NGOs in your area or let us find the closest support services
+              Browse verified NGOs in your area or let us find the closest support
+              services
             </p>
           </div>
-          
+
           <div className="text-center">
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Shield className="h-8 w-8 text-purple-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">2. Connect Safely</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              2. Connect Safely
+            </h3>
             <p className="text-gray-600">
-              Reach out through secure channels designed to protect your privacy and safety
+              Reach out through secure channels designed to protect your privacy and
+              safety
             </p>
           </div>
-          
+
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="h-8 w-8 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">3. Get Support</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              3. Get Support
+            </h3>
             <p className="text-gray-600">
-              Receive immediate assistance from trained professionals who understand your situation
+              Receive immediate assistance from trained professionals who understand
+              your situation
             </p>
           </div>
         </div>
@@ -179,17 +209,26 @@ const PublicHome = () => {
               Ready to Make a Difference?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Whether you need help or want to help others, join our community of support
+              Whether you need help or want to help others, join our community of
+              support
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/ngos">
-                <Button size="lg" variant="secondary" className="bg-white text-blue-600 hover:bg-gray-100">
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="bg-white text-blue-600 hover:bg-gray-100"
+                >
                   <Users className="mr-2 h-5 w-5" />
                   Browse NGOs
                 </Button>
               </Link>
               <Link to="/donate">
-                <Button size="lg" variant="outline" className="border-white text-blue-600 hover:bg-white/10">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white text-blue-600 hover:bg-white/10"
+                >
                   <Heart className="mr-2 h-5 w-5" />
                   Donate Now
                 </Button>

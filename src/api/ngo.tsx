@@ -116,7 +116,5 @@ export const rejectNGO = async (id: string) => {
   }
   // append status to req document
   await setDoc(requestRef, { status: "rejected" }, { merge: true });
-  
-  // Optionally, you can return a success message or the ID of the deleted request
   return id;
 }

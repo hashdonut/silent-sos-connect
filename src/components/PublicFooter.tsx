@@ -51,7 +51,7 @@ const PublicFooter = () => {
 
         <div className="border-t border-gray-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-gray-500 text-sm">
-            © 2024 SilentSOS+. All rights reserved. Made with <Heart className="inline h-4 w-4 text-red-500" /> for safety.
+            © 2025 SilentSOS+. All rights reserved. Made with <Heart className="inline h-4 w-4 text-red-500" /> for safety.
           </p>
           <div className="mt-4 md:mt-0">
             <p className="text-sm text-gray-500">
